@@ -6,6 +6,7 @@ BAE (BAE: BERT-Based Adversarial Examples)
 from textattack import Attack
 from textattack.constraints.grammaticality import PartOfSpeech
 from textattack.constraints.pre_transformation import (
+    InputColumnModification,
     RepeatModification,
     StopwordModification,
 )
@@ -60,6 +61,11 @@ class MyBAEGarg2019(AttackRecipe):
         #
         constraints = [RepeatModification(), StopwordModification()]
         constraints.append(MaxWordsPerturbed(max_percent=0.25))
+
+        input_column_modification = InputColumnModification(
+            ["premise", "hypothesis"], {"premise"}
+        )
+        constraints.append(input_column_modification)
 
         # For the R operations we add an additional check for
         # grammatical correctness of the generated adversarial example by filtering

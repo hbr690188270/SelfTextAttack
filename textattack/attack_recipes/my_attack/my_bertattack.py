@@ -13,6 +13,7 @@ BERT-Attack:
 from textattack import Attack
 from textattack.constraints.overlap import MaxWordsPerturbed
 from textattack.constraints.pre_transformation import (
+    InputColumnModification,
     RepeatModification,
     StopwordModification,
 )
@@ -52,6 +53,11 @@ class MyBERTAttackLi2020(AttackRecipe):
         # parameter is trivial since most attacks only need a few changes. This
         # epsilon is only used to avoid too much queries on those very hard samples."
         constraints.append(MaxWordsPerturbed(max_percent=0.25))
+
+        input_column_modification = InputColumnModification(
+            ["premise", "hypothesis"], {"premise"}
+        )
+        constraints.append(input_column_modification)
 
         # "As used in TextFooler (Jin et al., 2019), we also use Universal Sentence
         # Encoder (Cer et al., 2018) to measure the semantic consistency between the
