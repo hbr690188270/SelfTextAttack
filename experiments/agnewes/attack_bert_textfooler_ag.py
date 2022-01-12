@@ -26,7 +26,7 @@ def load_dataset_sst(path='./../../../text_pgd_attack/agnews/'):
     return filtered_dataset
 
 
-directory = './../../../text_pgd_attack/checkpoints/bert-agnews/'
+directory = './../../../std_text_pgd_attack/checkpoints/bert-agnews/'
 model = BertForSequenceClassification.from_pretrained(directory)
 tokenizer = BertTokenizer.from_pretrained(directory)
 wrapper_model = huggingface_model_wrapper.HuggingFaceModelWrapper(model, tokenizer)

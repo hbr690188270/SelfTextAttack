@@ -6,7 +6,7 @@ from textattack.attack_recipes import MyBERTAttackLi2020
 from textattack.models.wrappers import huggingface_model_wrapper
 
 
-def load_dataset_sst(path='./../../../text_pgd_attack/agnews/'):
+def load_dataset_sst(path='./../../../std_text_pgd_attack/agnews/'):
     def process_file(file):
         data_list = []
         with open(path + file, 'r', encoding='utf-8') as f:
@@ -26,7 +26,7 @@ def load_dataset_sst(path='./../../../text_pgd_attack/agnews/'):
     return filtered_dataset
 
 
-directory = './../../../text_pgd_attack/checkpoints/bert-agnews/'
+directory = './../../../std_text_pgd_attack/checkpoints/bert-agnews/'
 model = BertForSequenceClassification.from_pretrained(directory)
 tokenizer = BertTokenizer.from_pretrained(directory)
 wrapper_model = huggingface_model_wrapper.HuggingFaceModelWrapper(model, tokenizer)
