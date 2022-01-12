@@ -21,18 +21,16 @@ def load_dataset_qnli(path=''):
 
     test_dataset = process_file("test.tsv")
 
-    filtered_sen_list, filtered_label_list = [], []
-    test_sen_list, test_label_list = test_dataset
-    with open("~/std_text_pgd_attack/attack_set_idx/qnli_attack_idx.txt", 'r', encoding='utf-8') as f:
+    filtered_dataset = []
+    with open("./../../../std_text_pgd_attack/attack_set_idx/qnli_attack_idx.txt", 'r', encoding='utf-8') as f:
         for line in f:
             idx = int(line.strip())
-            filtered_sen_list.append(test_sen_list[idx])
-            filtered_label_list.append(test_label_list[idx])
-    return filtered_sen_list, filtered_label_list
+            filtered_dataset.append((test_dataset[idx][0], test_dataset[idx][1]))
+    return filtered_dataset
 
 
-directory = '~/std_text_pgd_attack/checkpoints/bert-qnli/'
-dataset = load_dataset_qnli("~/std_text_pgd_attack/qnli/")
+directory = './../../../std_text_pgd_attack/checkpoints/bert-qnli/'
+dataset = load_dataset_qnli("./../../../std_text_pgd_attack/qnli/")
 dataset = textattack.datasets.Dataset(dataset, input_columns=['premise', 'hypothesis'])
 
 model = BertForSequenceClassification.from_pretrained(directory)
