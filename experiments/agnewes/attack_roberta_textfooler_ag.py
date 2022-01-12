@@ -6,7 +6,7 @@ from textattack.attack_recipes.my_attack.my_textfooler import MyTextFoolerJin201
 from textattack.models.wrappers import huggingface_model_wrapper
 
 
-def load_dataset_sst(path='./../../../text_pgd_attack/agnews/'):
+def load_dataset_sst(path='./../../../std_text_pgd_attack/agnews/'):
     def process_file(file):
         data_list = []
         with open(path + file, 'r', encoding='utf-8') as f:
