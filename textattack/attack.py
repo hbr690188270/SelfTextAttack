@@ -8,6 +8,8 @@ from typing import List, Union
 
 import lru
 import torch
+from collections import deque
+
 
 import textattack
 from textattack.attack_results import (
@@ -427,6 +429,109 @@ class Attack:
         else:
             result = self._attack(goal_function_result)
             return result
+
+    def attack_one(self, initial_result):
+        """Calls the ``SearchMethod`` to perturb the ``AttackedText`` stored in
+        ``initial_result``.
+
+        Args:
+            initial_result: The initial ``GoalFunctionResult`` from which to perturb.
+
+        Returns:
+            A ``SuccessfulAttackResult``, ``FailedAttackResult``,
+                or ``MaximizedAttackResult``.
+        """
+        final_result = self.search_method(initial_result)
+        self.clear_cache()
+        if final_result.goal_status == GoalFunctionResultStatus.SUCCEEDED:
+            return SuccessfulAttackResult(
+                initial_result,
+                final_result,
+            )
+        elif final_result.goal_status == GoalFunctionResultStatus.SEARCHING:
+            return FailedAttackResult(
+                initial_result,
+                final_result,
+            )
+        elif final_result.goal_status == GoalFunctionResultStatus.MAXIMIZING:
+            return MaximizedAttackResult(
+                initial_result,
+                final_result,
+            )
+        else:
+            raise ValueError(f"Unrecognized goal status {final_result.goal_status}")
+
+
+    def _get_examples_from_dataset(self, dataset, indices=None):
+        """Gets examples from a dataset and tokenizes them.
+
+        Args:
+            dataset: An iterable of (text_input, ground_truth_output) pairs
+            indices: An iterable of indices of the dataset that we want to attack. If None, attack all samples in dataset.
+
+        Returns:
+            results (Iterable[GoalFunctionResult]): an iterable of GoalFunctionResults of the original examples
+        """
+        if indices is None:
+            indices = range(len(dataset))
+
+        if not isinstance(indices, deque):
+            indices = deque(sorted(indices))
+
+        if not indices:
+            return
+            yield
+
+        while indices:
+            i = indices.popleft()
+            try:
+                text_input, ground_truth_output = dataset[i]
+            except IndexError:
+                utils.logger.warn(
+                    f"Dataset has {len(dataset)} samples but tried to access index {i}. Ending attack early."
+                )
+                break
+
+            try:
+                # get label names from dataset, if possible
+                label_names = dataset.label_names
+            except AttributeError:
+                label_names = None
+            attacked_text = AttackedText(
+                text_input, attack_attrs={"label_names": label_names}
+            )
+            goal_function_result, _ = self.goal_function.init_attack_example(
+                attacked_text, ground_truth_output
+            )
+            yield goal_function_result
+
+    def attack_dataset(self, dataset, indices=None, visualize = False):
+        """Runs an attack on the given dataset and outputs the results to the
+        console and the output file.
+
+        Args:
+            dataset: An iterable of (text, ground_truth_output) pairs.
+            indices: An iterable of indices of the dataset that we want to attack. If None, attack all samples in dataset.
+        """
+        from tqdm import tqdm
+        if visualize:
+            examples = tqdm(list(self._get_examples_from_dataset(dataset, indices=indices)))
+        else:
+            examples = list(self._get_examples_from_dataset(dataset, indices=indices))
+
+        results = []
+        for goal_function_result in examples:
+            if goal_function_result.goal_status == GoalFunctionResultStatus.SKIPPED:
+                res = SkippedAttackResult(goal_function_result)
+            else:
+                # try:
+                res = self.attack_one(goal_function_result)
+                # except Exception:
+                #     continue
+                # yield result
+            results.append(res)
+        return results
+
 
     def __repr__(self):
         """Prints attack parameters in a human-readable string.
