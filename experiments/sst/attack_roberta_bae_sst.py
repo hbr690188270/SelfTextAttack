@@ -37,7 +37,7 @@ recipe = MyBAEGarg2019.build(wrapper_model)
 dataset = load_dataset_sst()
 dataset = textattack.datasets.Dataset(dataset)
 
-attack_args = textattack.AttackArgs(num_examples = -1, log_to_txt = './log/bae_sst_robertalarge.txt', query_budget = 500)
+attack_args = textattack.AttackArgs(num_examples = -1, log_to_txt = './log/bae_sst_robertalarge_query2000.txt', query_budget = 2000)
 attacker = Attacker(recipe, dataset, attack_args)
 results = attacker.attack_dataset()
 

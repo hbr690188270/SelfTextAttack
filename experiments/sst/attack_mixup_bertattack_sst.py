@@ -10,6 +10,7 @@ from textattack.attack_recipes import MyBERTAttackLi2020
 from textattack.datasets import HuggingFaceDataset
 from textattack.models.wrappers import ModelWrapper, huggingface_model_wrapper
 from textattack.models.wrappers import HuggingFaceModelWrapper
+from textattack.models.self_models import MixText
 
 def load_dataset_sst(path = '/mnt/cloud/bairu/repos/text_pgd_attack/sst-2/'):
     def process_file(file):    
@@ -27,9 +28,9 @@ def load_dataset_sst(path = '/mnt/cloud/bairu/repos/text_pgd_attack/sst-2/'):
     test_dataset = process_file("test.tsv")
     return test_dataset
 
-directory = '/mnt/cloud/bairu/repos/std_text_pgd_attack/checkpoints/bert-base-uncased-sst'
-model = BertForSequenceClassification.from_pretrained(directory)
-tokenizer = BertTokenizer.from_pretrained('/mnt/cloud/bairu/repos/text_pgd_attack/checkpoints/bert-base-uncased-sst')
+directory = '/mnt/cloud/bairu/repos/TextDefender/checkpoints/bert-base-mixup-sst'
+model = MixText.from_pretrained(directory)
+tokenizer = BertTokenizer.from_pretrained('/mnt/cloud/bairu/repos/std_text_pgd_attack/checkpoints/bert-base-uncased-sst')
 wrapper_model = huggingface_model_wrapper.HuggingFaceModelWrapper(model, tokenizer)
 recipe = MyBERTAttackLi2020.build(wrapper_model)
 
@@ -37,7 +38,7 @@ recipe = MyBERTAttackLi2020.build(wrapper_model)
 dataset = load_dataset_sst()
 dataset = textattack.datasets.Dataset(dataset)
 
-attack_args = textattack.AttackArgs(num_examples = -1, log_to_txt = './log/bertattack_sst_bertbase_query2000_25.txt', query_budget = 2000)
+attack_args = textattack.AttackArgs(num_examples = -1, log_to_txt = './log/bertattack_sst_mixup_query2000.txt', query_budget = 2000)
 attacker = Attacker(recipe, dataset, attack_args)
 results = attacker.attack_dataset()
 

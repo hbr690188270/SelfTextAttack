@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 # from transformers import AutoTokenizer, TFAutoModelForSequenceClassification, pipeline
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import RobertaTokenizer, RobertaForSequenceClassification
 import textattack
 from textattack import Attacker
 from textattack.attack_recipes import MyBERTAttackLi2020
@@ -27,9 +27,9 @@ def load_dataset_sst(path = '/mnt/cloud/bairu/repos/text_pgd_attack/sst-2/'):
     test_dataset = process_file("test.tsv")
     return test_dataset
 
-directory = '/mnt/cloud/bairu/repos/std_text_pgd_attack/checkpoints/bert-base-uncased-sst'
-model = BertForSequenceClassification.from_pretrained(directory)
-tokenizer = BertTokenizer.from_pretrained('/mnt/cloud/bairu/repos/text_pgd_attack/checkpoints/bert-base-uncased-sst')
+directory = '/mnt/cloud/bairu/repos/std_text_pgd_attack/checkpoints/roberta-large-sst'
+model = RobertaForSequenceClassification.from_pretrained(directory)
+tokenizer = RobertaTokenizer.from_pretrained(directory)
 wrapper_model = huggingface_model_wrapper.HuggingFaceModelWrapper(model, tokenizer)
 recipe = MyBERTAttackLi2020.build(wrapper_model)
 
@@ -37,7 +37,7 @@ recipe = MyBERTAttackLi2020.build(wrapper_model)
 dataset = load_dataset_sst()
 dataset = textattack.datasets.Dataset(dataset)
 
-attack_args = textattack.AttackArgs(num_examples = -1, log_to_txt = './log/bertattack_sst_bertbase_query2000_25.txt', query_budget = 2000)
+attack_args = textattack.AttackArgs(num_examples = -1, log_to_txt = './log/bertattack_sst_robertalarge_query2000.txt', query_budget = 2000)
 attacker = Attacker(recipe, dataset, attack_args)
 results = attacker.attack_dataset()
 
